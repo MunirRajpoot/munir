@@ -1,17 +1,18 @@
 'use client';
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { FaPhoneAlt } from 'react-icons/fa';
 import { IoMdMail } from 'react-icons/io';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ContactPage = () => {
-    const [submitted, setSubmitted] = useState(false);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         email: '',
         phone: '',
-        service: '',
+        category: '',
         message: ''
     });
 
@@ -19,26 +20,54 @@ const ContactPage = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setSubmitted(true);
 
-        // Optional: reset form
-        setFormData({
-            firstName: '',
-            lastName: '',
-            email: '',
-            message: ''
-        });
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
 
-        // Hide animation after 3 seconds
-        setTimeout(() => setSubmitted(false), 3000);
+            if (response.ok) {
+                toast.success("✅ Message sent successfully!");
+                setFormData({
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    phone: '',
+                    category: '',
+                    message: ''
+                });
+            } else if (response.status === 409) {
+                const result = await response.json();
+                toast.error(result.error || "⚠️ This email already exists.");
+            } else {
+                toast.error("❌ Failed to submit form. Please try again later.");
+            }
+        } catch (error) {
+            console.error("Error submitting form:", error);
+            toast.error("🚫 Something went wrong. Please try again.");
+        }
     };
 
     return (
-        <div className="min-h-screen px-4 flex flex-col md:flex-row items-start md:items-center justify-center gap-12">
+        <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="min-h-screen flex flex-col lg:flex-row items-start justify-start lg:items-center gap-12 mt-[80px] sm:px-6 md:px-10 lg:px-16"
+        >
+            <ToastContainer position="top-right" autoClose={3000} />
+
             {/* Contact Form */}
-            <div className="w-full md:w-1/2 bg-gradient-to-br from-[#1c1c1c] to-[#2a2a2a] p-8 shadow-lg rounded-xl relative">
+            <motion.div
+                initial={{ opacity: 0, x: -40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+                className="w-full lg:w-1/2 bg-gradient-to-br from-[#1c1c1c] to-[#2a2a2a] p-8 shadow-lg rounded-xl relative"
+            >
                 <h1 className="text-3xl font-bold text-cyan-500 mb-2">Let's work together</h1>
                 <p className="text-gray-400 mb-6">Fill out the form and I’ll get back to you soon.</p>
 
@@ -83,18 +112,16 @@ const ContactPage = () => {
 
                     {/* Select Dropdown */}
                     <select
-                        name="inquiryType"
-                        value={formData.service || ''}
+                        name="category"
+                        value={formData.category || ''}
                         onChange={handleChange}
                         className="w-full px-4 py-2 border border-gray-300 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
                     >
                         <option value="" disabled>Select a service</option>
-                        <option value="web-development" className="text-black">Web Development</option>
+                        <option value="full-stack" className="text-black">Full Stack Development</option>
                         <option value="frontend" className="text-black">Frontend Development</option>
                         <option value="backend" className="text-black">Backend Development</option>
-                        
                     </select>
-
 
                     {/* Message Textarea */}
                     <textarea
@@ -114,50 +141,34 @@ const ContactPage = () => {
                         Send Message
                     </button>
                 </form>
-
-
-                {/* Success Animation */}
-                <AnimatePresence>
-                    {submitted && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.4 }}
-                            className="absolute inset-0 bg-white bg-opacity-95 flex flex-col justify-center items-center rounded-xl"
-                        >
-                            <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1.2 }}
-                                transition={{ type: 'spring', stiffness: 300 }}
-                                className="text-green-500 text-4xl mb-2"
-                            >
-                                ✅
-                            </motion.div>
-                            <p className="text-lg text-gray-700 font-semibold">Message Sent Successfully!</p>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
+            </motion.div>
 
             {/* Contact Info */}
-            <div className="w-full md:w-1/3 space-y-6">
+            <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="w-full lg:w-1/3 space-y-6"
+            >
                 <ContactInfo icon={<FaPhoneAlt />} label="Phone" value="(+92 314 3415578)" />
                 <ContactInfo icon={<IoMdMail />} label="Email" value="munirrajpoot1012@gmail.com" />
                 <ContactInfo icon={<IoMdMail />} label="Address" value="Faisalabad, Punjab, Pakistan" />
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
 
 const ContactInfo = ({ icon, label, value }) => (
-    <div className="flex items-center gap-4 p-4 transition-all">
+    <motion.div
+        whileHover={{ scale: 1.02 }}
+        className="flex items-center gap-4 p-4 transition-all"
+    >
         <div className="bg-gradient-to-br from-[#1c1c1c] to-[#2a2a2a] p-5 rounded text-cyan-600 text-3xl">{icon}</div>
         <div>
             <p className="text-sm text-gray-400">{label}</p>
             <p className="text-lg font-semibold text-white">{value}</p>
         </div>
-    </div>
+    </motion.div>
 );
 
 export default ContactPage;

@@ -196,7 +196,7 @@ const ResumePage = () => {
     };
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 px-12 py-6 text-white min-h-screen">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 px-8 md:px-8 py-6 text-white min-h-screen mt-[80px]">
             {/* Left Sidebar */}
             <div className="flex flex-col col-span-1 gap-4 items-stretch justify-start h-full">
                 {['Experience', 'Education', 'Skills', 'About me'].map((section) => (
@@ -214,7 +214,7 @@ const ResumePage = () => {
             </div>
 
             {/* Right Content */}
-            <div className="col-span-1 md:col-span-3 flex flex-col justify-start">
+            <div className="col-span-1 md:col-span-3 flex flex-col justify-start ">
                 {renderSection()}
             </div>
         </div>
